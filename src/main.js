@@ -1,8 +1,7 @@
 const crypto = require('crypto')
 
 class Block {
-  constructor(index, timestamp, data, prevHash = '') {
-    this.index = index
+  constructor(timestamp, data, prevHash = '') {
     this.timestamp = timestamp
     this.data = data
     this.prevHash = prevHash
@@ -11,8 +10,7 @@ class Block {
   }
 
   calculateHash() {
-    // console.log(crypto.createHmac('sha256', `${this.index}${this.timestamp}${JSON.stringify(this.data)}${this.prevHash}`))
-    return crypto.createHmac('sha256', `${this.index}${this.timestamp}${JSON.stringify(this.data)}${this.prevHash}${this.nonce}`).digest('hex')
+    return crypto.createHmac('sha256', `${this.timestamp}${JSON.stringify(this.data)}${this.prevHash}${this.nonce}`).digest('hex')
   }
 
   mineBlock(difficulty) {
@@ -31,7 +29,7 @@ class BlockChain {
   }
 
   createGenesisBlock() {
-    return new Block(0, '01/01/2018', 'Genesis Block', '0')
+    return new Block('01/01/2018', 'Genesis Block', '0')
   }
 
   getLatestBlock() {
