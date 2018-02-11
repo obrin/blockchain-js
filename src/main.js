@@ -22,7 +22,6 @@ class Block {
   }
 
   mineBlock(difficulty) {
-    const zeros = new Array(difficulty + 1).join('0')
     while (this.hash.substring(0, difficulty) !== new Array(difficulty + 1).join('0')) {
       this.nonce++
       this.hash = this.calculateHash()
