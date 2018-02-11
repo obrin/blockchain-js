@@ -50,4 +50,24 @@ describe('BlockChain', () => {
       assert.equal(subject.getLatestBlock().hash.substring(0, difficulty).length, difficulty)
     })
   })
+
+  describe('#getBalanceOfAddress', () => {
+    let subject
+    let amount1 = 4
+    let amount2 = 8
+    beforeEach(() => {
+      subject = new BlockChain()
+      subject.createTransaction(new Transaction('fish', 'pork', amount1))
+      subject.createTransaction(new Transaction('fish', 'pork', amount2))
+      subject.minePendingTransations('miner')
+    })
+
+    it('returns the correct of sender', () => {
+      assert.equal(subject.getBalanceOfAddress('fish'), 0 - amount1 - amount2)
+    })
+
+    it('returns the correct of receiver', () => {
+      assert.equal(subject.getBalanceOfAddress('pork'), amount1 + amount2)
+    })
+  })
 })

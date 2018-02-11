@@ -77,6 +77,23 @@ class BlockChain {
 
     return true
   }
+
+  getBalanceOfAddress(address) {
+    let balance = 0
+    this.chain.forEach((block) => {
+      block.transactions.forEach((transaction) => {
+        if (transaction.fromAddress === address) {
+          balance -= transaction.amount
+        }
+
+        if(transaction.toAddress === address) {
+          balance += transaction.amount
+        }
+      })
+    })
+
+    return balance
+  }
 }
 
 module.exports = {
