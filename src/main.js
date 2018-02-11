@@ -1,16 +1,24 @@
 const crypto = require('crypto')
 
+class Transaction {
+  constructor(fromAddress, toAddress, amount) {
+    this.fromAddress = fromAddress
+    this.toAddress = toAddress
+    this.amount = amount
+  }
+}
+
 class Block {
-  constructor(timestamp, data, prevHash = '') {
+  constructor(timestamp, transactions, prevHash = '') {
     this.timestamp = timestamp
-    this.data = data
+    this.transactions = transactions
     this.prevHash = prevHash
     this.hash = this.calculateHash()
     this.nonce = 0
   }
 
   calculateHash() {
-    return crypto.createHmac('sha256', `${this.timestamp}${JSON.stringify(this.data)}${this.prevHash}${this.nonce}`).digest('hex')
+    return crypto.createHmac('sha256', `${this.timestamp}${JSON.stringify(this.transactions)}${this.prevHash}${this.nonce}`).digest('hex')
   }
 
   mineBlock(difficulty) {
@@ -26,20 +34,31 @@ class BlockChain {
   constructor(difficulty = 2) {
     this.chain = [this.createGenesisBlock()]
     this.difficulty = difficulty
+    this.pendingTransactions = []
+    this.miningReward = 100
   }
 
   createGenesisBlock() {
-    return new Block('01/01/2018', 'Genesis Block', '0')
+    return new Block('01/01/2018', [], '0')
   }
 
   getLatestBlock() {
     return this.chain[this.chain.length - 1]
   }
 
-  addBlock(newBlock) {
-    newBlock.prevHash = this.getLatestBlock().hash
-    newBlock.mineBlock(this.difficulty)
-    this.chain.push(newBlock)
+  createTransaction(transaction) {
+    this.pendingTransactions.push(transaction)
+  }
+
+  minePendingTransations(miningRewardAddress) {
+    const block = new Block(Date.now(), this.pendingTransactions, this.getLatestBlock().hash)
+    block.mineBlock(this.difficulty)
+
+    this.chain.push(block)
+
+    this.pendingTransactions = [
+      new Transaction(null, miningRewardAddress, this.miningReward)
+    ]
   }
 
   isChainValid() {
@@ -61,6 +80,7 @@ class BlockChain {
 }
 
 module.exports = {
+  Transaction,
   Block,
   BlockChain
 }

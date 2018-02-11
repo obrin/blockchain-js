@@ -1,4 +1,4 @@
-const { BlockChain, Block } = require('../src/main')
+const { Transaction, BlockChain, Block } = require('../src/main')
 const assert = require('assert')
 
 describe('BlockChain', () => {
@@ -10,31 +10,31 @@ describe('BlockChain', () => {
 
   it('creates a chain of blocks', () => {
     const subject = new BlockChain()
-    subject.addBlock(new Block('01/01/2018', { amount: 4 }))
-    subject.addBlock(new Block('02/01/2018', { amount: 8 }))
+    subject.createTransaction(new Transaction('fish', 'pork', 4))
+    subject.createTransaction(new Transaction('fish', 'pork', 8))
+    subject.minePendingTransations('miner')
 
-    assert.deepStrictEqual(subject.chain.length, 3)
+    assert.deepStrictEqual(subject.chain.length, 2)
   })
 
   describe('#isChainValid', () => {
     it('returns false when block is tampered', () => {
       const subject = new BlockChain()
-      subject.addBlock(new Block('01/01/2018', { amount: 4 }))
-      subject.addBlock(new Block('02/01/2018', { amount: 8 }))
+      subject.createTransaction(new Transaction('fish', 'pork', 4))
+      subject.createTransaction(new Transaction('fish', 'pork', 8))
+      subject.minePendingTransations('miner')
 
       // Tamper blockchain
-      subject.chain[1].data = { amount: 100 };
+      subject.chain[1] = new Block(Date.now(), new Transaction('fish', 'pork', 1000), 'tampered hash')
 
       assert.deepStrictEqual(subject.isChainValid(), false)
     })
 
     it('returns true when block is not tampered', () => {
-
       const subject = new BlockChain()
-      subject.addBlock(new Block('01/01/2018', { amount: 4 }))
-      subject.addBlock(new Block('02/01/2018', { amount: 8 }))
-
-      console.log(subject.isChainValid())
+      subject.createTransaction(new Transaction('fish', 'pork', 4))
+      subject.createTransaction(new Transaction('fish', 'pork', 8))
+      subject.minePendingTransations('miner')
 
       assert.ok(subject.isChainValid())
     })
@@ -44,8 +44,9 @@ describe('BlockChain', () => {
     it('has hash with the same number of starting zeros as difficulty number', () => {
       const difficulty = 2
       const subject = new BlockChain(difficulty)
-      subject.addBlock(new Block('01/01/2018', { amount: 4 }))
-      subject.addBlock(new Block('02/01/2018', { amount: 8 }))
+      subject.createTransaction(new Transaction('fish', 'pork', 4))
+      subject.createTransaction(new Transaction('fish', 'pork', 8))
+      subject.minePendingTransations('miner')
       assert.equal(subject.getLatestBlock().hash.substring(0, difficulty).length, difficulty)
     })
   })
