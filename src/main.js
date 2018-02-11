@@ -7,17 +7,27 @@ class Block {
     this.data = data
     this.prevHash = prevHash
     this.hash = this.calculateHash()
+    this.nonce = 0
   }
 
   calculateHash() {
     // console.log(crypto.createHmac('sha256', `${this.index}${this.timestamp}${JSON.stringify(this.data)}${this.prevHash}`))
-    return crypto.createHmac('sha256', `${this.index}${this.timestamp}${JSON.stringify(this.data)}${this.prevHash}`).digest('hex')
+    return crypto.createHmac('sha256', `${this.index}${this.timestamp}${JSON.stringify(this.data)}${this.prevHash}${this.nonce}`).digest('hex')
+  }
+
+  mineBlock(difficulty) {
+    const zeros = new Array(difficulty + 1).join('0')
+    while (this.hash.substring(0, difficulty) !== new Array(difficulty + 1).join('0')) {
+      this.nonce++
+      this.hash = this.calculateHash()
+    }
   }
 }
 
 class BlockChain {
-  constructor() {
+  constructor(difficulty = 2) {
     this.chain = [this.createGenesisBlock()]
+    this.difficulty = difficulty
   }
 
   createGenesisBlock() {
@@ -30,7 +40,7 @@ class BlockChain {
 
   addBlock(newBlock) {
     newBlock.prevHash = this.getLatestBlock().hash
-    newBlock.hash = newBlock.calculateHash()
+    newBlock.mineBlock(this.difficulty)
     this.chain.push(newBlock)
   }
 
